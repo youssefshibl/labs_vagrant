@@ -13,6 +13,8 @@ const port = 3000;
 app.get('/', (req, res) => {
     exec("whoami", (error, stdout, stderr) => {
         if (error) {
+          console.log(stdout);
+          console.error("-------------------------------------------");
           console.error(error);
           res.status(500).send('Error creating VM');
         } else {
