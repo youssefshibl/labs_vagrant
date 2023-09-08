@@ -1,8 +1,8 @@
 
 
 Vagrant.configure("2") do |config|
-  #config.vm.box = "ubuntu"
-  config.vm.box = "debian/jessie64"
+  config.vm.box = "ubuntu"
+  #config.vm.box = "debian/jessie64"
   # config.vm.box_url = "./package.box"
   config.vm.provider "virtualbox" do |vb|
     vb.memory = "2048"
@@ -10,7 +10,7 @@ Vagrant.configure("2") do |config|
   end
   config.vm.network "private_network", type: "dhcp",name: "vboxnet1",virtualbox__intnet: false
   #config.vm.network "public_network", ip: "192.168.56.10"
-
+  config.vm.define "init_lab"
   # Remove any other network configurations
   config.vm.provision "shell", path: "script.sh"
 end
