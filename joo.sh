@@ -18,6 +18,7 @@ chmod 600 "$current_path/.ssh/id_rsa"
 chmod 644 "$current_path/.ssh/id_rsa.pub"
 
 
+
 echo $(ssh-add "$current_path/.ssh/id_rsa")
 
 
