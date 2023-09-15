@@ -18,7 +18,4 @@ Vagrant.configure("2") do |config|
   # set name to vm in vagrant 
   config.vm.hostname = "@@VM_NAME@@"
   
-
-
-
 end
