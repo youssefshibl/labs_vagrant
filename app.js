@@ -31,8 +31,9 @@ app.get("/", (req, res) => {
 });
 
 // create vm route
-app.post("/create-vm", (req, res) => {
-  const labname = req.query.labname || req.body.labname || "";
+app.get("/create-vm/:lab_name", (req, res) => {
+  //const labname = req.query.labname || req.body.labname || "";
+  let labname = req.params.lab_name || "";
   if (labname === "") {
     res.status(400).send("Lab name is required");
     return;
@@ -48,7 +49,7 @@ app.post("/create-vm", (req, res) => {
   let runningDir = "running" + "/" + vmname;
   let copyCommand =
     "mkdir -p " + runningDir + " && cp -r " + labpath + "/* " + runningDir;
-  console.log(copyCommand);
+  //console.log(copyCommand);
   // copy lab files to running directory
   exec(copyCommand, (error, stdout, stderr) => {
     if (error) {
@@ -60,7 +61,7 @@ app.post("/create-vm", (req, res) => {
       // change boxname @@VM_BOX@@" vagrant file with boxname
       const vagrantfilePath = `./${runningDir}`;
       const ReplacevVmCommand = `sed -i 's/@@VM_NAME@@/${vmname}/g' ${vagrantfilePath}/Vagrantfile ; sed -i 's/@@VM_BOX@@/${labsconfig.labs[labname].lab_box}/g' ${vagrantfilePath}/Vagrantfile`;
-      console.log(ReplacevVmCommand);
+      //console.log(ReplacevVmCommand);
 
       exec(ReplacevVmCommand, (error, stdout, stderr) => {
         if (error) {
@@ -70,12 +71,17 @@ app.post("/create-vm", (req, res) => {
           console.log(stdout);
           // this test command
           // ---------------------------------------------
-          res.status(200).send({
+          let data1 = {
             vmname: vmname,
             labname: labname,
             labpath: labpath,
             vagrantfilePath: vagrantfilePath,
-          });
+            ip: "192.168.11.165",
+            hostname: "test",
+            hosts: "test",
+            resolv: "test",
+          };
+          res.render("runlab", { lab: data1 });
           return;
           // ---------------------------------------------
           const command = `VAGRANT_CWD=${vagrantfilePath} vagrant up`;
@@ -250,20 +256,23 @@ app.listen(port, () => {
 app.get("/download/vpnfile", (req, res) => {
   let rootpassword = "149";
   let client = "client" + Date.now();
-  let command = `echo -e "${rootpassword}\n1\n${client}\n1\n" | sudo -S ./scripts/openvpn-install.sh`;
-  // let command = `./scripts/createuser.sh ${client}`;
+  // let command = `echo -e "${rootpassword}\n1\n${client}\n1\n" | sudo -S ./scripts/openvpn-install.sh`;
+  let command = `./scripts/createuser.sh ${client}`;
   let filepath = `/home/shebl/${client}.ovpn`;
   console.log(filepath);
+
   exec(command, (error, stdout, stderr) => {
     if (error) {
       console.error(error);
       res.status(500).send("Error creating VPN");
     } else {
-      console.log(stdout);
+      // console.log(stdout);
       // download vpn file
       res.download(filepath);
-      // res.zip([
-      //   { path: filepath, name: `${client}.ovpn` },
+
+      //  res.zip([
+      //   { path: '/path/to/file1.name', name: '/path/in/zip/file1.name' },
+      //   { path: '/path/to/file2.name', name: 'file2.name' }
       // ]);
     }
   });

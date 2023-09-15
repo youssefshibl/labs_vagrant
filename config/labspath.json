@@ -20,7 +20,7 @@
         },
         "init_lab2" : {
             "lab_path": "labs/init_lab",
-            "lab_name": "init_lab1",
+            "lab_name": "init_lab2",
             "lab_box": "init_lab",
             "lab_image": "https://www.hackthebox.com/storage/avatars/2ad5dcb2fb97e40f5e88a0d6fc569bdd.png",
             "os" : "linux",
@@ -29,7 +29,7 @@
         },
         "init_lab3" : {
             "lab_path": "labs/init_lab",
-            "lab_name": "init_lab1",
+            "lab_name": "init_lab3",
             "lab_box": "init_lab",
             "lab_image": "https://www.hackthebox.com/storage/avatars/105a4cb882fc64175eb598a63c4930a8.png",
             "os" : "linux",

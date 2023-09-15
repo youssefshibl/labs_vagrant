@@ -16,7 +16,6 @@ header .header span:first-of-type {
   font-size: 80px;
   color: white;
   font-family: monospace;
-  opacity: 0.7;
 }
 
 header .header span:nth-of-type(2) {
@@ -24,7 +23,6 @@ header .header span:nth-of-type(2) {
   color: white;
   font-family: monospace;
   margin-left: 70px;
-  opacity: 0.7;
 }
 
 
@@ -109,4 +107,14 @@ header .header span:nth-of-type(2) {
     cursor: pointer;
     text-decoration: none;
     font-family: monospace;
+}
+
+
+.vm-ip{
+  color: white;
+  font-size: 40px;
+  font-family: monospace;
+  padding: 20px 50px;
+  background: #9acd36b5;
+  border-radius: 3px;
 }
