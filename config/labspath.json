@@ -4,7 +4,7 @@
             "lab_path": "labs/init_lab",
             "lab_name": "init_lab",
             "lab_box": "init_lab",
-            "lab_image": "https://www.hackthebox.com/storage/avatars/30fc6acef9d23aa9fd71277123c64f24.png",
+            "lab_image": "https://www.hackthebox.com/storage/avatars/84ab22908d5dd51ab6bd64f99f81b7be.png",
             "os" : "linux",
             "level" : "beginner",
             "description" : "This is a test lab"
