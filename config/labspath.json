@@ -1,5 +1,13 @@
 {
     "labs" : {
-        "init_lab" : "labs/init_lab"
+        "init_lab" : {
+            "lab_path": "labs/init_lab",
+            "lab_name": "init_lab",
+            "lab_box": "init_lab",
+            "lab_image": "image_1256.png",
+            "os" : "linux",
+            "level" : "beginner",
+            "description" : "This is a test lab"
+        }
     }
 }

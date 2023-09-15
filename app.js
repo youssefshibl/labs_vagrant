@@ -33,7 +33,7 @@ app.post("/create-vm", (req, res) => {
     return;
   }
   // search in labsconfig
-  const labpath = labsconfig.labs[labname];
+  const labpath = labsconfig.labs[labname].lab_path;
   if (!labpath) {
     res.status(404).send("Lab not found");
     return;
@@ -52,9 +52,9 @@ app.post("/create-vm", (req, res) => {
     } else {
       console.log(stdout);
       // change name "@@VM_NAME@@" vagrant file with vmname
+      // change boxname @@VM_BOX@@" vagrant file with boxname
       const vagrantfilePath = `./${runningDir}`;
-
-      const ReplacevVmCommand = `sed -i 's/@@VM_NAME@@/${vmname}/g' ${vagrantfilePath}/Vagrantfile`;
+      const ReplacevVmCommand = `sed -i 's/@@VM_NAME@@/${vmname}/g' ${vagrantfilePath}/Vagrantfile ; sed -i 's/@@VM_BOX@@/${labsconfig.labs[labname].lab_box}/g' ${vagrantfilePath}/Vagrantfile`;
       console.log(ReplacevVmCommand);
 
       exec(ReplacevVmCommand, (error, stdout, stderr) => {
@@ -63,36 +63,95 @@ app.post("/create-vm", (req, res) => {
           res.status(500).send("Error creating VM");
         } else {
           console.log(stdout);
-          const command = `VAGRANT_CWD=${vagrantfilePath} vagrant up`;
-          console.log(command);
-
-          // run vm in RunningVmData array
-          RunningVmData.push({
+          // this test command
+          // ---------------------------------------------
+          res.status(200).send({
             vmname: vmname,
             labname: labname,
             labpath: labpath,
             vagrantfilePath: vagrantfilePath,
           });
+          return;
+          // ---------------------------------------------
+          const command = `VAGRANT_CWD=${vagrantfilePath} vagrant up`;
+          console.log(command);
+          // run vm in RunningVmData array
+          exec(command, (error, stdout, stderr) => {
+            if (error) {
+              console.error(error);
+              res.status(500).send("Error creating VM");
+            } else {
+              console.log(stdout);
+              // run provision script
+              const provisionCommand = `VAGRANT_CWD=${vagrantfilePath} vagrant provision`;
+              exec(provisionCommand, (error, stdout, stderr) => {
+                if (error) {
+                  console.error(error);
+                  res.status(500).send("Error creating VM");
+                } else {
+                  console.log(stdout);
+                  // get ip of vm 
+                  const getIpCommand = `VAGRANT_CWD=${vagrantfilePath} vagrant ssh -c "hostname -I | awk '{print $2}'"`;
+                  exec(getIpCommand, (error, stdout, stderr) => {
+                    if (error) {
+                      console.error(error);
+                      res.status(500).send("Error creating VM");
+                    } else {
+                      console.log(stdout);
+                      // get hostname of vm
+                      const ip = stdout.split("\n")[1];
+                      const provisionCommand = `VAGRANT_CWD=${vagrantfilePath} vagrant ssh -c "cat /etc/hostname"`;
+                      exec(provisionCommand, (error, stdout, stderr) => {
+                        if (error) {
+                          console.error(error);
+                          res.status(500).send("Error creating VM");
+                        } else {
+                          console.log(stdout);
+                          // get hostes of vm
+                          const hostname = stdout.split("\n")[1];
+                          
+                          const provisionCommand = `VAGRANT_CWD=${vagrantfilePath} vagrant ssh -c "cat /etc/hosts"`;
+                          exec(provisionCommand, (error, stdout, stderr) => {
+                            if (error) {
+                              console.error(error);
+                              res.status(500).send("Error creating VM");
+                            } else {
+                              console.log(stdout);
+                              // get resolv of vm
+                              const hosts = stdout.split("\n");
+                              const provisionCommand = `VAGRANT_CWD=${vagrantfilePath} vagrant ssh -c "cat /etc/resolv.conf"`;
+                              exec(provisionCommand, (error, stdout, stderr) => {
+                                if (error) {
+                                  console.error(error);
+                                  res.status(500).send("Error creating VM");
+                                } else {
+                                  console.log(stdout);
+                                  const resolv = stdout.split("\n");
+                                  let hostsData = {
+                                    vmname: vmname,
+                                    labname: labname,
+                                    labpath: labpath,
+                                    vagrantfilePath: vagrantfilePath,
+                                    ip: ip,
+                                    hostname: hostname,
+                                    hosts: hosts,
+                                    resolv: resolv,
+                                  };
+                                  RunningVmData.push(hostsData);
+                                  res.status(200).send(hostsData);
+                                }
+                              });
+                            }
+                          });
+                        }
+                      });
+                    }
+                  });
 
-          // exec(command, (error, stdout, stderr) => {
-          //   if (error) {
-          //     console.error(error);
-          //     res.status(500).send("Error creating VM");
-          //   } else {
-          //     console.log(stdout);
-          //     // run provision script
-          //     const provisionCommand = `VAGRANT_CWD=${vagrantfilePath} vagrant provision`;
-          //     exec(provisionCommand, (error, stdout, stderr) => {
-          //       if (error) {
-          //         console.error(error);
-          //         res.status(500).send("Error creating VM");
-          //       } else {
-          //         console.log(stdout);
-          //         res.status(200).send("VM created successfully");
-          //       }
-          //     });
-          //   }
-          // });
+                }
+              });
+            }
+          });
         }
       });
     }
@@ -105,7 +164,7 @@ app.get("/delete-vm/:id", (req, res) => {
     res.status(400).send("VM name is required");
     return;
   }
-  // search in labsconfig
+  // search in runningVmData
   let vm = RunningVmData.find((vm) => vm.vmname === vmname);
   if (!vm) {
     res.status(404).send("VM not found");
@@ -155,7 +214,7 @@ app.get("/get-vm/:id", (req, res) => {
     res.status(400).send("VM name is required");
     return;
   }
-  // search in labsconfig
+  // search in runningVmData
   let vm = RunningVmData.find((vm) => vm.vmname === vmname);
   if (!vm) {
     res.status(404).send("VM not found");
