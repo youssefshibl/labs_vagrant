@@ -4,7 +4,34 @@
             "lab_path": "labs/init_lab",
             "lab_name": "init_lab",
             "lab_box": "init_lab",
-            "lab_image": "image_1256.png",
+            "lab_image": "https://www.hackthebox.com/storage/avatars/30fc6acef9d23aa9fd71277123c64f24.png",
+            "os" : "linux",
+            "level" : "beginner",
+            "description" : "This is a test lab"
+        },
+        "init_lab1" : {
+            "lab_path": "labs/init_lab",
+            "lab_name": "init_lab1",
+            "lab_box": "init_lab",
+            "lab_image": "https://www.hackthebox.com/storage/avatars/eaed7cd01e84ef5c6ec7d949d1d61110.png",
+            "os" : "linux",
+            "level" : "beginner",
+            "description" : "This is a test lab"
+        },
+        "init_lab2" : {
+            "lab_path": "labs/init_lab",
+            "lab_name": "init_lab1",
+            "lab_box": "init_lab",
+            "lab_image": "https://www.hackthebox.com/storage/avatars/2ad5dcb2fb97e40f5e88a0d6fc569bdd.png",
+            "os" : "linux",
+            "level" : "beginner",
+            "description" : "This is a test lab"
+        },
+        "init_lab3" : {
+            "lab_path": "labs/init_lab",
+            "lab_name": "init_lab1",
+            "lab_box": "init_lab",
+            "lab_image": "https://www.hackthebox.com/storage/avatars/105a4cb882fc64175eb598a63c4930a8.png",
             "os" : "linux",
             "level" : "beginner",
             "description" : "This is a test lab"

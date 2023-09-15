@@ -1,0 +1,19 @@
+<%- include('header'); %>
+
+<div class="container">
+  <% for(var i = 0; i < labs.length; i++) { %>
+  <div class="box">
+    <div class="face front">
+      <img
+        src="<%= labs[i].lab_image %>"
+        alt=""
+      />
+    </div>
+    <div class="face back">
+      <div class="lab_title"><%= labs[i].lab_name %></div>
+    </div>
+  </div>
+  <% } %>
+</div>
+
+<%- include('footer'); %>

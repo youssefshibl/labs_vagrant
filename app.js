@@ -1,12 +1,17 @@
 const express = require("express");
 const { exec } = require("child_process");
+const path = require("path");
+const sudoPrompt = require("sudo-prompt");
+var zip = require("express-zip");
+
 bodyParser = require("body-parser");
 let labsconfig = require("./config/labspath.json");
 
 const app = express();
 
 app.use(bodyParser.json());
-
+app.set("view engine", "ejs");
+app.use(express.static(path.join(__dirname, "assets")));
 const port = 3000;
 
 let RunningVmData = [];
@@ -90,7 +95,7 @@ app.post("/create-vm", (req, res) => {
                   res.status(500).send("Error creating VM");
                 } else {
                   console.log(stdout);
-                  // get ip of vm 
+                  // get ip of vm
                   const getIpCommand = `VAGRANT_CWD=${vagrantfilePath} vagrant ssh -c "hostname -I | awk '{print $2}'"`;
                   exec(getIpCommand, (error, stdout, stderr) => {
                     if (error) {
@@ -109,7 +114,7 @@ app.post("/create-vm", (req, res) => {
                           console.log(stdout);
                           // get hostes of vm
                           const hostname = stdout.split("\n")[1];
-                          
+
                           const provisionCommand = `VAGRANT_CWD=${vagrantfilePath} vagrant ssh -c "cat /etc/hosts"`;
                           exec(provisionCommand, (error, stdout, stderr) => {
                             if (error) {
@@ -120,34 +125,36 @@ app.post("/create-vm", (req, res) => {
                               // get resolv of vm
                               const hosts = stdout.split("\n");
                               const provisionCommand = `VAGRANT_CWD=${vagrantfilePath} vagrant ssh -c "cat /etc/resolv.conf"`;
-                              exec(provisionCommand, (error, stdout, stderr) => {
-                                if (error) {
-                                  console.error(error);
-                                  res.status(500).send("Error creating VM");
-                                } else {
-                                  console.log(stdout);
-                                  const resolv = stdout.split("\n");
-                                  let hostsData = {
-                                    vmname: vmname,
-                                    labname: labname,
-                                    labpath: labpath,
-                                    vagrantfilePath: vagrantfilePath,
-                                    ip: ip,
-                                    hostname: hostname,
-                                    hosts: hosts,
-                                    resolv: resolv,
-                                  };
-                                  RunningVmData.push(hostsData);
-                                  res.status(200).send(hostsData);
+                              exec(
+                                provisionCommand,
+                                (error, stdout, stderr) => {
+                                  if (error) {
+                                    console.error(error);
+                                    res.status(500).send("Error creating VM");
+                                  } else {
+                                    console.log(stdout);
+                                    const resolv = stdout.split("\n");
+                                    let hostsData = {
+                                      vmname: vmname,
+                                      labname: labname,
+                                      labpath: labpath,
+                                      vagrantfilePath: vagrantfilePath,
+                                      ip: ip,
+                                      hostname: hostname,
+                                      hosts: hosts,
+                                      resolv: resolv,
+                                    };
+                                    RunningVmData.push(hostsData);
+                                    res.status(200).send(hostsData);
+                                  }
                                 }
-                              });
+                              );
                             }
                           });
                         }
                       });
                     }
                   });
-
                 }
               });
             }
@@ -223,10 +230,41 @@ app.get("/get-vm/:id", (req, res) => {
   res.status(200).send(vm);
 });
 
-app.get("/get-all-vm", (req, res) => {
+app.get("/get-all-running-vm", (req, res) => {
   res.status(200).send(RunningVmData);
+});
+
+app.get("/get-all-labs", (req, res) => {
+  res.status(200).send(labsconfig.labs);
+});
+
+app.get("/labs", (req, res) => {
+  let labs = Object.values(labsconfig.labs);
+  res.render("labs", { view: "labs", labs: labs });
 });
 
 app.listen(port, () => {
   console.log(`Server listening on port ${port}`);
+});
+
+app.get("/download/vpnfile", (req, res) => {
+  let rootpassword = "149";
+  let client = "client" + Date.now();
+  let command = `echo -e "${rootpassword}\n1\n${client}\n1\n" | sudo -S ./scripts/openvpn-install.sh`;
+  // let command = `./scripts/createuser.sh ${client}`;
+  let filepath = `/home/shebl/${client}.ovpn`;
+  console.log(filepath);
+  exec(command, (error, stdout, stderr) => {
+    if (error) {
+      console.error(error);
+      res.status(500).send("Error creating VPN");
+    } else {
+      console.log(stdout);
+      // download vpn file
+      res.download(filepath);
+      // res.zip([
+      //   { path: filepath, name: `${client}.ovpn` },
+      // ]);
+    }
+  });
 });
